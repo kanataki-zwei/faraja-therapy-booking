@@ -7,11 +7,19 @@ from utils.booking import book_session, save_booking
 # ✅ Connect to Google Sheets using secrets
 client, spreadsheet, sheet = connect_to_gsheet()
 
+if sheet is None:
+    st.error("❌ Failed to connect to Google Sheets. Please check credentials.")
+    st.stop()  # Prevent further execution if no connection
+
 st.title("Faraja Cancer Therapy Booking System")
 st.subheader("Available Therapy Sessions")
 
-# Get session data
+# ✅ Fetch session data safely
 df = get_sessions(sheet)
+
+if df.empty:
+    st.error("⚠ No therapy session data found. Please check your Google Sheet.")
+    st.stop()
 
 # ✅ First Filter: Therapy Name
 therapy_filter = st.selectbox("Select Therapy Type", ["All"] + list(df["Therapy Name"].unique()))
@@ -38,17 +46,17 @@ booking_status_filter = st.selectbox("Select Booking Status", ["All"] + list(df_
 if booking_status_filter != "All":
     df_filtered = df_filtered[df_filtered["Booking Status"] == booking_status_filter]
 
-# ✅ Display Available Sessions in Table Format
+# ✅ Display Available Sessions
 st.subheader("Available Sessions")
 if not df_filtered.empty:
     df_filtered_display = df_filtered[["Therapy Name", "Therapist Name", "Date Available", "Start Time", "End Time", "Booking Status"]]
     st.dataframe(df_filtered_display)
 else:
-    st.warning("No sessions available for the selected filters.")
+    st.warning("⚠ No sessions available for the selected filters.")
 
 # ✅ Let User Select a Session
 if not df_filtered.empty:
-    # ✅ Include Booking Status in the selection dropdown
+    # ✅ Include Booking Status in selection dropdown
     session_selection = st.selectbox(
         "Select a Session",
         df_filtered.apply(lambda row: f"{row['Therapy Name']} - {row['Therapist Name']} - {row['Date Available']} {row['Start Time']} to {row['End Time']} (Status: {row['Booking Status']})", axis=1)
@@ -62,7 +70,7 @@ if not df_filtered.empty:
         session_status = matching_row.iloc[0]["Booking Status"]  # Get status
 
         if session_status == "Full":
-            st.error("This session is full, please book an available session.")
+            st.error("❌ This session is full. Please select an available session.")
         else:
             # ✅ Get user details
             name = st.text_input("Full Name")
@@ -75,18 +83,18 @@ if not df_filtered.empty:
                 return re.fullmatch(r"\d{10}", phone) is not None
 
             if phone and not is_valid_phone(phone):  # Instant validation
-                st.error("Invalid phone number. Please enter a 10-digit number.")
+                st.error("❌ Invalid phone number. Please enter a 10-digit number.")
 
             # ✅ Only show "Book Now" if phone is valid
             if phone and is_valid_phone(phone):
                 if st.button("Book Now"):
                     if not name:
-                        st.error("Please enter your full name.")
+                        st.error("❌ Please enter your full name.")
                     else:
                         status = book_session(sheet, df, session_index)
 
                         if status == "Success":
                             save_booking(spreadsheet, name, attendee_type, phone, df.loc[session_index])  # Pass full spreadsheet object
-                            st.success("Booking confirmed!")
+                            st.success("✅ Booking confirmed!")
                         else:
-                            st.error("This session is already full. Please choose another session.")
+                            st.error("❌ This session is already full. Please choose another session.")
