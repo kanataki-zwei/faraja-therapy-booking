@@ -2,6 +2,7 @@ credentials/google_sheets_creds.json
 __pycache__/
 .venv/
 gsheet_copy.py 
-app_copy.py 
+app copy.py
+app_copy.py
 .DS_Store
 
