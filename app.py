@@ -38,12 +38,10 @@ client, spreadsheet, sheet = connect_to_gsheet()
 # =========================
 # ✅ Connect to Google Sheet
 # =========================
-"""
-client, spreadsheet, sheet = connect_to_gsheet(
-    sheet_id="1VpvxpRZOkLprum6D7F_ozYO26l20Y0GgVqkOktzEaQU",
-    json_key_file="credentials/google_sheets_creds.json"
-)"
-"""
+#client, spreadsheet, sheet = connect_to_gsheet(
+#    sheet_id="1VpvxpRZOkLprum6D7F_ozYO26l20Y0GgVqkOktzEaQU",
+#    json_key_file="credentials/google_sheets_creds.json"
+#)
 
 if sheet is None:
     st.error("❌ Failed to connect to Google Sheets. Please check credentials.")
