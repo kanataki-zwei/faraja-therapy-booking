@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import re
-from utils.gsheet_copy import connect_to_gsheet
+from utils.gsheet import connect_to_gsheet
 
 def is_valid_kenyan_phone(phone):
     return re.fullmatch(r"07\d{8}", phone) is not None
