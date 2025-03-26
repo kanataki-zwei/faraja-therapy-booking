@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import re
 from utils.gsheet import connect_to_gsheet
+from utils.booking import cancel_booking
 
 def is_valid_kenyan_phone(phone):
     return re.fullmatch(r"07\d{8}", phone) is not None
@@ -18,7 +19,6 @@ def render_manage_bookings():
 
     if phone_lookup:
         try:
-            # ✅ Connect to Google Sheets using secrets
             client, spreadsheet, sheet = connect_to_gsheet()
 
             bookings_sheet = spreadsheet.worksheet("Bookings")
@@ -28,22 +28,19 @@ def render_manage_bookings():
             bookings_df["Phone"] = bookings_df["Phone"].astype(str).str.zfill(10)
             bookings_df["Date"] = pd.to_datetime(bookings_df["Date"].astype(str).str.strip(), format="%Y-%m-%d", errors="coerce")
             today = pd.to_datetime(pd.Timestamp.today().date())
-            upcoming_bookings = bookings_df[(bookings_df["Phone"] == phone_lookup) & (bookings_df["Date"] >= today)]
+            upcoming_bookings = bookings_df[(bookings_df["Phone"] == phone_lookup) & (bookings_df["Date"] >= today) & (bookings_df["is_cancelled"] != True)]
 
             if upcoming_bookings.empty:
                 st.warning("No upcoming bookings found for this number.")
                 st.write("Debug: Parsed Dates", bookings_df[["Phone", "Date"]])
                 return
 
-            # === Filters ===
             therapies = sorted(upcoming_bookings["Therapy Name"].dropna().unique())
             selected_therapy = st.selectbox("Select Therapy", ["All"] + therapies)
-
             filtered_by_therapy = upcoming_bookings if selected_therapy == "All" else upcoming_bookings[upcoming_bookings["Therapy Name"] == selected_therapy]
 
             therapists = sorted(filtered_by_therapy["Therapist"].dropna().unique())
             selected_therapist = st.selectbox("Select Therapist", ["All"] + therapists)
-
             filtered_by_therapist = filtered_by_therapy if selected_therapist == "All" else filtered_by_therapy[filtered_by_therapy["Therapist"] == selected_therapist]
 
             session_options = filtered_by_therapist.apply(
@@ -64,6 +61,7 @@ def render_manage_bookings():
             if action == "Cancel":
                 reason = st.text_area("Reason for cancellation")
                 if st.button("Confirm Cancellation"):
+                    cancel_booking(spreadsheet, selected_session, reason)
                     st.success("✅ Booking cancellation saved.")
                     st.info(f"Cancelled: {selected_session_label}\nReason: {reason}")
 
@@ -75,7 +73,6 @@ def render_manage_bookings():
                 all_sessions_df["Date Available"] = pd.to_datetime(all_sessions_df["Date Available"].astype(str).str.strip(), errors="coerce")
                 all_sessions_df = all_sessions_df[all_sessions_df["Booking Status"] != "Full"]
                 all_sessions_df = all_sessions_df[all_sessions_df["Date Available"] >= today]
-
                 all_sessions_df = all_sessions_df.sort_values(by=["Date Available", "Start Time"]).head(3)
 
                 if all_sessions_df.empty:
