@@ -121,8 +121,17 @@ def render_book_session():
                         else:
                             try:
                                 bookings_sheet = spreadsheet.worksheet("Bookings")
-                                bookings_data = bookings_sheet.get_all_records()
+                                bookings_data = bookings_sheet.get_all_records(head=1)
                                 bookings_df = pd.DataFrame(bookings_data)
+                                #st.write("Headers:", bookings_df.columns.tolist())
+
+                                if bookings_df.empty:
+                                    bookings_df = pd.DataFrame(columns=[
+                                        "Name", "Attendee Type", "Gender", "Phone", "Therapy Name", "Therapist",
+                                        "Date", "Time", "Location", "Format", "Timestamp"
+                                    ])
+
+                                bookings_df["Phone"] = bookings_df["Phone"].astype(str).str.zfill(10)
 
                                 session_date = pd.to_datetime(selected_session["Date Available"]).strftime("%Y-%m-%d")
                                 session_time = f"{selected_session['Start Time']} - {selected_session['End Time']}"
@@ -130,6 +139,7 @@ def render_book_session():
                                 already_booked = bookings_df[
                                     (bookings_df["Phone"] == phone) &
                                     (bookings_df["Therapy Name"] == selected_session["Therapy Name"]) &
+                                    (bookings_df["Therapist"] == selected_session["Therapist Name"]) &
                                     (bookings_df["Date"] == session_date) &
                                     (bookings_df["Time"] == session_time)
                                 ]
@@ -139,11 +149,11 @@ def render_book_session():
                                     st.error("❌ You already have a booking for this session.")
                                     st.info(
                                         f"**Booking Details:**\n\n"
-                                        f"- Therapy: {booked_row['Therapy Name']}\n"
-                                        f"- Date: {booked_row['Date']}\n"
-                                        f"- Time: {booked_row['Time']}\n"
-                                        f"- Location: {booked_row['Location']}\n"
-                                        f"- Format: {booked_row['Format']}"
+                                        f"- Therapy: {booked_row.get('Therapy Name', 'N/A')}\n"
+                                        f"- Date: {booked_row.get('Date', 'N/A')}\n"
+                                        f"- Time: {booked_row.get('Time', 'N/A')}\n"
+                                        f"- Location: {booked_row.get('Faraja Center Location', 'N/A')}\n"
+                                        f"- Format: {booked_row.get('Online or Physical', 'N/A')}"
                                     )
                                 else:
                                     status = book_session(sheet, df, session_index)
