@@ -1,7 +1,7 @@
 import re
 import streamlit as st
 import pandas as pd
-from utils.gsheet import connect_to_gsheet, get_sessions
+from utils.gsheet_copy import connect_to_gsheet, get_sessions
 from utils.booking import book_session, save_booking
 
 def render_book_session():

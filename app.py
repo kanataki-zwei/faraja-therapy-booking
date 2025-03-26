@@ -23,11 +23,49 @@ st.markdown(
 )
 
 # ======================
-# ✅ Sidebar Navigation
+# ✅ Sidebar Navigation (Styled)
 # ======================
-st.sidebar.title("📌 Navigation")
-tab = st.sidebar.radio("Go to:", ["📅 Book Session", "🔁 Manage My Bookings"])
+# Inject custom CSS for boxy buttons
+st.markdown("""
+    <style>
+    .sidebar-radio .stRadio > div {
+        display: flex;
+        flex-direction: column;
+    }
+    .sidebar-radio .stRadio label {
+        background-color: #444;
+        color: white;
+        padding: 10px 16px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: 0.3s ease;
+    }
+    .sidebar-radio .stRadio label:hover {
+        border-color: #888;
+    }
+    .sidebar-radio .stRadio input:checked + div > label {
+        background-color: #1a73e8;
+        border-color: #1a73e8;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
+with st.sidebar:
+    st.markdown("### 📌 Navigation")
+    st.markdown('<div class="sidebar-radio">', unsafe_allow_html=True)
+    tab = st.radio(
+        "Go to:",
+        ["📅 Book Session", "🔁 Manage My Bookings"],
+        key="nav_buttons",
+        label_visibility="collapsed"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ======================
+# ✅ Route to Pages
+# ======================
 if tab == "📅 Book Session":
     from modules.book_session import render_book_session
     render_book_session()
