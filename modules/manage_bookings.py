@@ -28,11 +28,16 @@ def render_manage_bookings():
             bookings_df["Phone"] = bookings_df["Phone"].astype(str).str.zfill(10)
             bookings_df["Date"] = pd.to_datetime(bookings_df["Date"].astype(str).str.strip(), format="%Y-%m-%d", errors="coerce")
             today = pd.to_datetime(pd.Timestamp.today().date())
-            upcoming_bookings = bookings_df[(bookings_df["Phone"] == phone_lookup) & (bookings_df["Date"] >= today) & (bookings_df["is_cancelled"] != True)]
+
+            # ✅ Filter out cancelled sessions
+            upcoming_bookings = bookings_df[
+                (bookings_df["Phone"] == phone_lookup) &
+                (bookings_df["Date"] >= today) &
+                (bookings_df["is_cancelled"].astype(str).str.lower() != "true")
+            ]
 
             if upcoming_bookings.empty:
                 st.warning("No upcoming bookings found for this number.")
-                st.write("Debug: Parsed Dates", bookings_df[["Phone", "Date"]])
                 return
 
             therapies = sorted(upcoming_bookings["Therapy Name"].dropna().unique())
@@ -56,11 +61,17 @@ def render_manage_bookings():
             selected_session_index = session_options.index(selected_session_label)
             selected_session = filtered_by_therapist.iloc[selected_session_index]
 
+            if selected_session.get("is_cancelled") == True or str(selected_session.get("is_cancelled")).lower() == "true":
+                st.error("❌ This session is already cancelled and cannot be modified.")
+                return
+
             action = st.radio("What would you like to do?", ["Cancel", "Reschedule"])
 
             if action == "Cancel":
                 reason = st.text_area("Reason for cancellation")
-                if st.button("Confirm Cancellation"):
+                if not reason.strip():
+                    st.error("❌ Please provide a reason for cancellation.")
+                elif st.button("Confirm Cancellation"):
                     cancel_booking(spreadsheet, selected_session, reason)
                     st.success("✅ Booking cancellation saved.")
                     st.info(f"Cancelled: {selected_session_label}\nReason: {reason}")
@@ -87,7 +98,9 @@ def render_manage_bookings():
                 new_session = st.selectbox("Choose a new session", session_dropdown)
                 reason = st.text_area("Reason for rescheduling")
 
-                if st.button("Confirm Reschedule"):
+                if not reason.strip():
+                    st.error("❌ Please provide a reason for rescheduling.")
+                elif st.button("Confirm Reschedule"):
                     st.success("✅ Booking rescheduled.")
                     st.info(f"Moved to: {new_session}\nReason: {reason}")
 
