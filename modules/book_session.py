@@ -52,8 +52,14 @@ def render_book_session():
     # === Display Filtered Sessions ===
     st.subheader("Available Sessions")
     display_cols = [
-        "Therapy Name", "Therapist Name", "Faraja Center Location", "Online or Physical",
-        "Date Available", "Start Time", "End Time", "Booking Status"
+        "Booking Status",               # 1
+        "Therapy Name",                 # 2
+        "Therapist Name",               # 3
+        "Online or Physical",           # 4
+        "Date Available",               # 5
+        "Start Time",                   # 6
+        "End Time",                     # 7
+        "Faraja Center Location"        # 8
     ]
 
     if not df_filtered.empty:
