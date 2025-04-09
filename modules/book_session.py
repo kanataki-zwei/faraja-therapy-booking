@@ -1,13 +1,17 @@
 import re
 import streamlit as st
 import pandas as pd
-from utils.gsheet import connect_to_gsheet, get_sessions
+from utils.gsheet_copy import connect_to_gsheet, get_sessions
 from utils.booking import book_session, save_booking
 
 def render_book_session():
     st.subheader("Available Therapy Sessions")
 
-    client, spreadsheet, sheet = connect_to_gsheet()
+    client, spreadsheet, sheet = connect_to_gsheet(
+        sheet_id="1VpvxpRZOkLprum6D7F_ozYO26l20Y0GgVqkOktzEaQU",
+        json_key_file="credentials/google_sheets_creds.json"
+    )
+
 
 
     if sheet is None:
