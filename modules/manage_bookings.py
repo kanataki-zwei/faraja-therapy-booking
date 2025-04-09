@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import re
-from utils.gsheet_copy import connect_to_gsheet
+from utils.gsheet import connect_to_gsheet
 from utils.booking import cancel_booking, save_booking
 
 
@@ -21,10 +21,7 @@ def render_manage_bookings():
 
     if phone_lookup:
         try:
-            client, spreadsheet, sheet = connect_to_gsheet(
-                sheet_id="1VpvxpRZOkLprum6D7F_ozYO26l20Y0GgVqkOktzEaQU",
-                json_key_file="credentials/google_sheets_creds.json"
-            )
+            client, spreadsheet, sheet = connect_to_gsheet()
 
 
 
