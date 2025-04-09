@@ -9,6 +9,7 @@ def render_book_session():
 
     client, spreadsheet, sheet = connect_to_gsheet()
 
+
     if sheet is None:
         st.error("❌ Failed to connect to Google Sheets. Please check credentials.")
         st.stop()
@@ -102,10 +103,17 @@ def render_book_session():
             gender = st.selectbox("🚻 **Gender** – Select gender", ["Male", "Female", "Other"])
             attendee_type = st.selectbox("👥 **Attendee Type** – Patient or Caregiver", ["Patient", "Caregiver"])
             phone = st.text_input("📞 **Phone Number** – Kenyan 10-digit number")
+            alt_phone = st.text_input("📱 **Alternative Phone Number** (Optional)")
 
             def is_valid_phone(phone): return re.fullmatch(r"07\d{8}", phone) is not None
+            # validate main phone
             if phone and not is_valid_phone(phone):
-                st.error("❌ Invalid phone number.")
+                st.error("❌ Invalid! Phone number must be a valid 10-digit Kenyan phone number.")
+            
+            # validate alt phone
+            # Validate alternative phone if provided
+            if alt_phone and not is_valid_phone(alt_phone):
+                st.warning("❌ Invalid! Phone number must be a valid 10-digit Kenyan phone number.")
 
             if phone and is_valid_phone(phone):
                 if st.button("Book Now"):
@@ -147,7 +155,7 @@ def render_book_session():
 
                             status = book_session(sheet, df, session_index)
                             if status == "Success":
-                                save_booking(spreadsheet, name, gender, attendee_type, phone, df.loc[session_index])
+                                save_booking(spreadsheet, name, gender, attendee_type, phone, df.loc[session_index], alt_phone)
                                 st.success("✅ Booking confirmed!")
                             else:
                                 st.error("❌ This session is already full.")

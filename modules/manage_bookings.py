@@ -23,6 +23,7 @@ def render_manage_bookings():
         try:
             client, spreadsheet, sheet = connect_to_gsheet()
 
+
             bookings_sheet = spreadsheet.worksheet("Bookings")
             bookings_data = bookings_sheet.get_all_records()
             bookings_df = pd.DataFrame(bookings_data)

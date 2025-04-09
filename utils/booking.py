@@ -27,7 +27,7 @@ def book_session(sheet, df, session_index):
         print(f"❌ Error updating session in Google Sheets: {e}")
         return "Error"
 
-def save_booking(spreadsheet, name, gender, attendee_type, phone, session_details):
+def save_booking(spreadsheet, name, gender, attendee_type, phone, session_details, alt_phone=None):
     try:
         try:
             bookings_sheet = spreadsheet.worksheet("Bookings")
@@ -36,7 +36,7 @@ def save_booking(spreadsheet, name, gender, attendee_type, phone, session_detail
             bookings_sheet.append_row([
                 "Name", "Attendee Type", "Gender", "Phone", "Therapy Name",
                 "Therapist", "Date", "Time", "Faraja Center Location", "Online or Physical",
-                "Timestamp", "is_cancelled", "is_rescheduled", "reason"
+                "Timestamp", "is_cancelled", "is_rescheduled", "reason", "Alt Phone"
             ])
 
         booking_data = [
@@ -53,7 +53,8 @@ def save_booking(spreadsheet, name, gender, attendee_type, phone, session_detail
             pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
             False,  # is_cancelled
             False,  # is_rescheduled
-            ""       # reason
+            "",       # reason
+            alt_phone
         ]
 
 
