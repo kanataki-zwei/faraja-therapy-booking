@@ -6,7 +6,7 @@ from utils.booking import cancel_booking, save_booking
 
 
 def is_valid_kenyan_phone(phone):
-    return re.fullmatch(r"07\d{8}", phone) is not None
+    return re.fullmatch(r"(07|01)\d{8}", phone) is not None
 
 
 def render_manage_bookings():
