@@ -106,7 +106,7 @@ def render_book_session():
             phone = st.text_input("📞 **Phone Number** – Kenyan 10-digit number")
             alt_phone = st.text_input("📱 **Alternative Phone Number** (Optional)")
 
-            def is_valid_phone(phone): return re.fullmatch(r"07\d{8}", phone) is not None
+            def is_valid_phone(phone): return re.fullmatch(r"(07|01)\d{8}", phone) is not None
             # validate main phone
             if phone and not is_valid_phone(phone):
                 st.error("❌ Invalid! Phone number must be a valid 10-digit Kenyan phone number.")
